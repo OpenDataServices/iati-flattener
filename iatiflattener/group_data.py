@@ -65,6 +65,14 @@ class GroupFlatIATIData():
         return conditions, outputs
 
 
+    def make_conditions_outputs_name_only(self, codelist, dataframe):
+        cl_key = codelist[0]
+        cl_items = codelist[1]
+        conditions = list(map(lambda cl_item: dataframe[cl_key] == cl_item, cl_items.keys()))
+        outputs = list(map(lambda cl_item: "{}".format(cl_item[1]), cl_items.items()))
+        return conditions, outputs
+
+
     def relabel_dataframe(self, dataframe, lang):
         """
         Fast way to add new column based on existing column.
@@ -73,10 +81,16 @@ class GroupFlatIATIData():
         for codelist in self.column_codelist[lang].items():
             cl_key = codelist[0]
             cl_items = codelist[1]
-            conditions, outputs = self.make_conditions_outputs(codelist, dataframe)
-            no_data = variables.TRANSLATIONS.get(lang).get('no-data')
-            res = np.select(conditions, outputs, no_data)
-            dataframe[cl_key] = pd.Series(res)
+            if cl_key in ['sector_category', 'sector_code']:
+                conditions, outputs = self.make_conditions_outputs_name_only(codelist, dataframe)
+                no_data = variables.TRANSLATIONS.get(lang).get('no-data')
+                res = np.select(conditions, outputs, no_data)
+                dataframe.insert(dataframe.columns.get_loc(cl_key) + 1, '{}_name'.format(cl_key), pd.Series(res))
+            else:
+                conditions, outputs = self.make_conditions_outputs(codelist, dataframe)
+                no_data = variables.TRANSLATIONS.get(lang).get('no-data')
+                res = np.select(conditions, outputs, no_data)
+                dataframe[cl_key] = pd.Series(res)
         return dataframe
 
 
