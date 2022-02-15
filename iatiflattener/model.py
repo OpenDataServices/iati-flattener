@@ -35,7 +35,7 @@ class ActivityCacheActivity():
 
     def __init__(self, iati_identifier):
         self.iati_identifier = iati_identifier
-        fields = ['title', 'currency', 'sectors',
+        fields = ['title', 'description', 'currency', 'sectors',
         'countries', 'regions', 'aid_type',
         'finance_type', 'flow_type', 'title',
         'reporting_org', 'participating_org_1',
@@ -248,6 +248,9 @@ class Common(FinancialValues):
     def _title(self):
         return Title(self.activity, self.activity_cache, self.langs)
 
+    def _description(self):
+        return Description(self.activity, self.activity_cache, self.langs)
+
     def _reporting_org(self):
         return ReportingOrg(self.activity, self.activity_cache, self.organisations_cache, self.langs)
 
@@ -431,6 +434,7 @@ class ActivityBudget(Common):
     def generate(self):
         self.iati_identifier = self._iati_identifier()
         self.title = self.update_cache(self._title())
+        self.description = self.update_cache(self._description())
         self.reporting_org = self.update_cache(self._reporting_org())
         self.reporting_org_type = self._reporting_org_type()
 
@@ -465,13 +469,13 @@ class ActivityBudget(Common):
         self.exchange_rates = exchange_rates
         self.organisations_cache = organisations_cache
         self.langs = langs
-        self.csv_fields = ['iati_identifier', 'title', 'reporting_org',
+        self.csv_fields = ['iati_identifier', 'title', 'description', 'reporting_org',
         'reporting_org_type', 'budgets',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_types',
         'finance_types', 'flow_types', 'provider_org', 'provider_org_type',
         'receiver_org', 'receiver_org_type',
         'transaction_type', 'url']
-        self.fields = ['iati_identifier', 'title', 'reporting_org',
+        self.fields = ['iati_identifier', 'title', 'description', 'reporting_org',
         'reporting_org_type', 'budgets',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_types',
         'finance_types', 'flow_types', 'provider_org', 'provider_org_type',
@@ -484,7 +488,7 @@ class ActivityBudget(Common):
                 '_type': 'type'
             }
         }
-        self.multilingual_fields = ['title', 'reporting_org',
+        self.multilingual_fields = ['title', 'description', 'reporting_org',
         'provider_org', 'receiver_org']
 
 
@@ -510,6 +514,7 @@ class Transaction(Common):
     def generate(self):
         self.iati_identifier = self._iati_identifier()
         self.title = self.update_cache(self._title())
+        self.description = self.update_cache(self._description())
         self.reporting_org = self.update_cache(self._reporting_org())
         self.reporting_org_type = self._reporting_org_type()
         self.countries = self.update_cache(self._countries())
@@ -551,7 +556,7 @@ class Transaction(Common):
         self.exchange_rates = exchange_rates
         self.limit_transaction_types = limit_transaction_types
         self.langs = langs
-        self.csv_fields = ['iati_identifier', 'title', 'reporting_org',
+        self.csv_fields = ['iati_identifier', 'title', 'description', 'reporting_org',
         'reporting_org_type',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_type',
         'finance_type', 'flow_type', 'provider_org', 'provider_org_type',
@@ -562,7 +567,7 @@ class Transaction(Common):
         'exchange_rate', 'exchange_rate_date', 'value_usd', 'value_eur',
         'value_local',
         'url']
-        self.fields = ['iati_identifier', 'title', 'reporting_org',
+        self.fields = ['iati_identifier', 'title', 'description', 'reporting_org',
         'reporting_org_type',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_type',
         'finance_type', 'flow_type', 'provider_org', 'provider_org_type',
@@ -578,7 +583,7 @@ class Transaction(Common):
                 '_type': 'type'
             }
         }
-        self.multilingual_fields = ['title', 'reporting_org',
+        self.multilingual_fields = ['title', 'description', 'reporting_org',
         'provider_org', 'receiver_org']
         self.organisations_cache = organisations_cache
 
@@ -612,6 +617,24 @@ class Title(Field):
         title = dict([(lang, get_narrative(self.activity.find("title"), lang)) for lang in self.langs])
         self.activity_cache.title = title
         return title
+
+    def __init__(self, activity, activity_cache, langs):
+        self.activity = activity
+        self.activity_cache = activity_cache
+        self.langs = langs
+        self.value = self.generate()
+
+
+class Description(Field):
+    def csv_value(self, lang):
+        return self.value.get(lang)
+
+    def generate(self):
+        if self.activity_cache.description is not None:
+            return self.activity_cache.description
+        description = dict([(lang, get_narrative(self.activity.find("description"), lang)) for lang in self.langs])
+        self.activity_cache.description = description
+        return description
 
     def __init__(self, activity, activity_cache, langs):
         self.activity = activity
