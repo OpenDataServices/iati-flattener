@@ -289,6 +289,13 @@ class Common(FinancialValues):
     def _dportal_url(self):
         return SimpleField(DPORTAL_URL.format(self.iati_identifier))
 
+    def _gender_marker_significance(self):
+        policy_markers = self.activity.findall('policy-marker[@code="1"]')
+        for policy_marker in policy_markers:
+            if 'vocabulary' not in policy_marker or policy_marker.attrib['vocabulary'] == '1':
+                return SimpleField(policy_marker.attrib['significance'])
+        return SimpleField(None)
+
     def update_cache(self, field):
         self.activity_cache = field.activity_cache
         return field
@@ -457,6 +464,7 @@ class ActivityBudget(Common):
         self.receiver_org_type = self._receiver_org_type()
         self.transaction_type = SimpleField('budget')
         self.url = self._dportal_url()
+        self.gender_marker_significance = self._gender_marker_significance()
         return True
 
     def __init__(self, activity, activity_cache, exchange_rates, currencies,
@@ -474,14 +482,14 @@ class ActivityBudget(Common):
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_types',
         'finance_types', 'flow_types', 'provider_org', 'provider_org_type',
         'receiver_org', 'receiver_org_type',
-        'transaction_type', 'url']
+        'transaction_type', 'url', 'gender_marker_significance']
         self.fields = ['iati_identifier', 'title', 'description', 'reporting_org',
         'reporting_org_type', 'budgets',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_types',
         'finance_types', 'flow_types', 'provider_org', 'provider_org_type',
         'receiver_org', 'receiver_org_type',
         'transaction_type',
-        'url']
+        'url', 'gender_marker_significance']
         self.fields_with_attributes = {
             'reporting_org': {
                 '': 'display',
@@ -542,6 +550,7 @@ class Transaction(Common):
         self.value_eur = self._exchange_rate_eur()
         self.value_local = self._values_local()
         self.url = self._dportal_url()
+        self.gender_marker_significance = self._gender_marker_significance()
         return True
 
     def __init__(self, activity, transaction, activity_cache, exchange_rates,
@@ -566,7 +575,7 @@ class Transaction(Common):
         'fiscal_quarter', 'fiscal_year_quarter',
         'exchange_rate', 'exchange_rate_date', 'value_usd', 'value_eur',
         'value_local',
-        'url']
+        'url', 'gender_marker_significance']
         self.fields = ['iati_identifier', 'title', 'description', 'reporting_org',
         'reporting_org_type',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_type',
@@ -576,7 +585,7 @@ class Transaction(Common):
         'value_date', 'transaction_date', 'fiscal_year',
         'fiscal_quarter', 'fiscal_year_quarter', 'exchange_rate',
         'exchange_rate_date', 'value_usd', 'value_eur', 'value_local',
-        'url']
+        'url', 'gender_marker_significance']
         self.fields_with_attributes = {
             'reporting_org': {
                 '': 'display',

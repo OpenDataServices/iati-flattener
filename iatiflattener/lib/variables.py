@@ -34,7 +34,8 @@ HEADERS = OrderedDict({
    'fiscal_year': np.int32,
    'fiscal_quarter': str,
    'fiscal_year_quarter': str,
-   'url': str
+   'url': str,
+   'gender_marker_significance': str,
 })
 
 
@@ -102,7 +103,9 @@ GROUP_BY_HEADERS = [
    'fiscal_year',
    'fiscal_quarter',
    'fiscal_year_quarter',
-   'url']
+   'url',
+   'gender_marker_significance',
+]
 
 
 def group_by_headers_with_langs(langs):
@@ -140,7 +143,9 @@ def group_by_headers_with_lang(lang):
    'fiscal_year',
    'fiscal_quarter',
    'fiscal_year_quarter',
-   'url']
+   'url',
+   'gender_marker_significance',
+   ]
 
 
 OUTPUT_HEADERS = {
@@ -169,9 +174,10 @@ OUTPUT_HEADERS = {
       'Calendar Quarter',
       'Calendar Year and Quarter',
       'URL',
+      'Gender Marker Significance',
       'Value (USD)',
       'Value (EUR)',
-      'Value (Local currrency)'
+      'Value (Local currrency)',
    ],
    'fr': [
       'Identifiant de l’IITA',
@@ -196,6 +202,7 @@ OUTPUT_HEADERS = {
       'Trimestre civil',
       'Année et trimestre civils',
       'URL',
+      'TODO: translate Gender Marker Significance',
       'Valeur (USD)',
       'Valeur (EUR)',
       'Valeur (Monnaie locale)'
@@ -223,6 +230,7 @@ OUTPUT_HEADERS = {
       'Trimestre natural',
       'Año y trimestre naturales',
       'URL',
+      'TODO: translate Gender Marker Significance',
       'Valor (USD)',
       'Valor (EUR)',
       'Valor (Divisa local)'
@@ -249,6 +257,7 @@ OUTPUT_HEADERS = {
       'Trimestre civil',
       'Ano e trimestre civis',
       'URL',
+      'TODO: translate Gender Marker Significance',
       'Valor (USD)',
       'Valor (EUR)',
       'Valor (Moeda local)'
