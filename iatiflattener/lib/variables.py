@@ -36,6 +36,7 @@ HEADERS = OrderedDict({
    'fiscal_year_quarter': str,
    'url': str,
    'gender_marker_significance': str,
+   'activity_start_date': str,
 })
 
 
@@ -105,6 +106,7 @@ GROUP_BY_HEADERS = [
    'fiscal_year_quarter',
    'url',
    'gender_marker_significance',
+   'activity_start_date',
 ]
 
 
@@ -145,6 +147,7 @@ def group_by_headers_with_lang(lang):
    'fiscal_year_quarter',
    'url',
    'gender_marker_significance',
+   'activity_start_date',
    ]
 
 
@@ -175,6 +178,7 @@ OUTPUT_HEADERS = {
       'Calendar Year and Quarter',
       'URL',
       'Gender Marker Significance',
+      'Activity Start Date',
       'Value (USD)',
       'Value (EUR)',
       'Value (Local currrency)',
@@ -203,6 +207,7 @@ OUTPUT_HEADERS = {
       'Année et trimestre civils',
       'URL',
       'TODO: translate Gender Marker Significance',
+      'TODO: translate Activity Start Date',
       'Valeur (USD)',
       'Valeur (EUR)',
       'Valeur (Monnaie locale)'
@@ -231,6 +236,7 @@ OUTPUT_HEADERS = {
       'Año y trimestre naturales',
       'URL',
       'TODO: translate Gender Marker Significance',
+      'TODO: translate Activity Start Date',
       'Valor (USD)',
       'Valor (EUR)',
       'Valor (Divisa local)'
@@ -258,6 +264,7 @@ OUTPUT_HEADERS = {
       'Ano e trimestre civis',
       'URL',
       'TODO: translate Gender Marker Significance',
+      'TODO: translate Activity Start Date',
       'Valor (USD)',
       'Valor (EUR)',
       'Valor (Moeda local)'
