@@ -1,4 +1,5 @@
 import requests
+import sqlalchemy
 import pandas as pd
 import numpy as np
 from pyexcelerate import Workbook
@@ -147,21 +148,25 @@ class GroupFlatIATIData():
                     df = df_budget
 
             if df is not None:
-                num_rows = len(df)
-                output_rows = 500000
-                if num_rows > output_rows:
-                    for start in range(0, num_rows, output_rows):
-                        df_part = df.iloc[start:start+output_rows, :]
-                        page = (start/output_rows)+1
-                        self.write_dataframe_to_excel(
-                            dataframe = df_part,
-                            filename = "output/xlsx/{}/{}-{}.xlsx".format(lang, country_code, page),
-                            lang = lang)
-                else:
-                    self.write_dataframe_to_excel(
-                        dataframe = df,
-                        filename = "output/xlsx/{}/{}.xlsx".format(lang, country_code),
-                        lang = lang)
+#                num_rows = len(df)
+#                output_rows = 500000
+#                if num_rows > output_rows:
+#                    for start in range(0, num_rows, output_rows):
+#                        df_part = df.iloc[start:start+output_rows, :]
+#                        page = (start/output_rows)+1
+#                        self.write_dataframe_to_excel(
+#                            dataframe = df_part,
+#                            filename = "output/xlsx/{}/{}-{}.xlsx".format(lang, country_code, page),
+#                            lang = lang)
+#                else:
+#                    self.write_dataframe_to_excel(
+#                        dataframe = df,
+#                        filename = "output/xlsx/{}/{}.xlsx".format(lang, country_code),
+#                        lang = lang)
+                from sqlalchemy import create_engine
+                path = "output/sqlite/{}/{}.db".format(lang, country_code)
+                engine = create_engine('sqlite:///{}'.format(path))
+                df.to_sql('iati_data', con=engine)
 
 
     def group_data(self):

@@ -9,6 +9,7 @@ numpy>=1.19.4
 PyExcelerate>=0.9.0
 openpyxl>=3.0.5
 iatikit>=3.2.1
+sqlalchemy
 """
 
 setup(
