@@ -1,4 +1,5 @@
 import json, datetime, csv, os
+from collections import defaultdict
 
 from iatiflattener.lib.utils import get_date, get_fy_fq, get_fy_fq_numeric, get_first
 from iatiflattener.lib.iati_helpers import clean_countries, clean_sectors, get_narrative, get_org_name, get_sector_category, TRANSACTION_TYPES_RULES, get_narrative_text, filter_none
@@ -35,7 +36,7 @@ class ActivityCacheActivity():
 
     def __init__(self, iati_identifier):
         self.iati_identifier = iati_identifier
-        fields = ['title', 'description', 'currency', 'sectors',
+        fields = ['title', 'description', 'target_groups', 'currency', 'sectors',
         'countries', 'regions', 'aid_type',
         'finance_type', 'flow_type', 'title',
         'reporting_org', 'participating_org_1',
@@ -249,7 +250,10 @@ class Common(FinancialValues):
         return Title(self.activity, self.activity_cache, self.langs)
 
     def _description(self):
-        return Description(self.activity, self.activity_cache, self.langs)
+        return Description(self.activity, self.activity_cache, self.langs, types=[1, 2])
+
+    def _target_groups(self):
+        return Description(self.activity, self.activity_cache, self.langs, types=[3])
 
     def _reporting_org(self):
         return ReportingOrg(self.activity, self.activity_cache, self.organisations_cache, self.langs)
@@ -452,6 +456,7 @@ class ActivityBudget(Common):
         self.iati_identifier = self._iati_identifier()
         self.title = self.update_cache(self._title())
         self.description = self.update_cache(self._description())
+        self.target_groups = self.update_cache(self._target_groups())
         self.reporting_org = self.update_cache(self._reporting_org())
         self.reporting_org_type = self._reporting_org_type()
 
@@ -488,13 +493,13 @@ class ActivityBudget(Common):
         self.exchange_rates = exchange_rates
         self.organisations_cache = organisations_cache
         self.langs = langs
-        self.csv_fields = ['iati_identifier', 'title', 'description', 'reporting_org',
+        self.csv_fields = ['iati_identifier', 'title', 'description', 'target_groups', 'reporting_org',
         'reporting_org_type', 'budgets',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_types',
         'finance_types', 'flow_types', 'provider_org', 'provider_org_type',
         'receiver_org', 'receiver_org_type',
         'transaction_type', 'url', 'gender_marker_significance', 'activity_start_date']
-        self.fields = ['iati_identifier', 'title', 'description', 'reporting_org',
+        self.fields = ['iati_identifier', 'title', 'description', 'target_groups', 'reporting_org',
         'reporting_org_type', 'budgets',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_types',
         'finance_types', 'flow_types', 'provider_org', 'provider_org_type',
@@ -507,7 +512,7 @@ class ActivityBudget(Common):
                 '_type': 'type'
             }
         }
-        self.multilingual_fields = ['title', 'description', 'reporting_org',
+        self.multilingual_fields = ['title', 'description', 'target_groups', 'reporting_org',
         'provider_org', 'receiver_org']
 
 
@@ -534,6 +539,7 @@ class Transaction(Common):
         self.iati_identifier = self._iati_identifier()
         self.title = self.update_cache(self._title())
         self.description = self.update_cache(self._description())
+        self.target_groups = self.update_cache(self._target_groups())
         self.reporting_org = self.update_cache(self._reporting_org())
         self.reporting_org_type = self._reporting_org_type()
         self.countries = self.update_cache(self._countries())
@@ -577,7 +583,7 @@ class Transaction(Common):
         self.exchange_rates = exchange_rates
         self.limit_transaction_types = limit_transaction_types
         self.langs = langs
-        self.csv_fields = ['iati_identifier', 'title', 'description', 'reporting_org',
+        self.csv_fields = ['iati_identifier', 'title', 'description', 'target_groups', 'reporting_org',
         'reporting_org_type',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_type',
         'finance_type', 'flow_type', 'provider_org', 'provider_org_type',
@@ -588,7 +594,7 @@ class Transaction(Common):
         'exchange_rate', 'exchange_rate_date', 'value_usd', 'value_eur',
         'value_local',
         'url', 'gender_marker_significance', 'activity_start_date']
-        self.fields = ['iati_identifier', 'title', 'description', 'reporting_org',
+        self.fields = ['iati_identifier', 'title', 'description', 'target_groups', 'reporting_org',
         'reporting_org_type',
         'countries', 'sectors', 'multi_country', 'humanitarian', 'aid_type',
         'finance_type', 'flow_type', 'provider_org', 'provider_org_type',
@@ -604,7 +610,7 @@ class Transaction(Common):
                 '_type': 'type'
             }
         }
-        self.multilingual_fields = ['title', 'description', 'reporting_org',
+        self.multilingual_fields = ['title', 'description', 'target_groups', 'reporting_org',
         'provider_org', 'receiver_org']
         self.organisations_cache = organisations_cache
 
@@ -651,16 +657,27 @@ class Description(Field):
         return self.value.get(lang)
 
     def generate(self):
-        if self.activity_cache.description is not None:
-            return self.activity_cache.description
-        description = dict([(lang, get_narrative(self.activity.find("description"), lang)) for lang in self.langs])
-        self.activity_cache.description = description
+        description = defaultdict(str)
+        for lang in self.langs:
+            for type_ in self.types:
+                description_elements = self.activity.xpath(f"description[@type={type_}]")
+                if not len(description_elements):
+                    continue
+                narrative = get_narrative(description_elements[0], lang)
+                if narrative:
+                    if description[lang]:
+                        if '\n' in description[lang]:
+                            description[lang] += '\n\n'
+                        else:
+                            description[lang] += ' '
+                    description[lang] += narrative
         return description
 
-    def __init__(self, activity, activity_cache, langs):
+    def __init__(self, activity, activity_cache, langs, types):
         self.activity = activity
         self.activity_cache = activity_cache
         self.langs = langs
+        self.types = types
         self.value = self.generate()
 
 
