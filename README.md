@@ -1,13 +1,5 @@
-# IATI Flattener
+# Fork of IATI Flattener
 
-A set of tools to flatten IATI XML transactional and budget data into clean, denormalised data.
+The original tool can be found at https://github.com/iati-data-access/iati-flattener
 
-Nightly generated Excel files can also be found at [IATI Data Access](https://iati-data-access.github.io)
-
-## Installation
-
-You can install this package via PyPI
-
-```
-pip3 install iatiflattener
-```
+This copy has been edited to add extra columns, and output sqlite. For more information see https://github.com/pwyf/pwyf-wee-scripts
